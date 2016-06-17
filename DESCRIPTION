@@ -2,11 +2,16 @@ Package: mSpatial
 Title: Some Convenience Functions building on the rGeos library
 Version: 0.1
 Authors@R: person("Matthew", "Townley", email = "townleym@gmail.com", role = c("aut", "cre"))
-Description: This should be a long paragraph describing and I'll probably be annoyed later when I read it and it's not. But it's just a place for convenience functions I've written to do spatial analysis.
-Depends: 
+Description: This should be a long paragraph describing and I'll probably be
+    annoyed later when I read it and it's not. But it's just a place for convenience
+    functions I've written to do spatial analysis.
+Depends:
     R (>= 3.2.3)
 License: What license is it under?
 LazyData: true
-RoxygenNote: 5.0.1.9000
-Imports: raster,
-    rgeos
+RoxygenNote: 5.0.1
+Imports:
+    raster,
+    rgeos,
+    sp,
+    magrittr

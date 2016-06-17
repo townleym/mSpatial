@@ -132,14 +132,59 @@ gEnclosedCentroid = function(container, reference) {
 #' \strong{Note}: all inputs should be of class \code{sp::SpatialPolygons|Points}
 #;
 #' @param allpoints A \code{SpatialPoints} or \code{SpatialPointsDataFrame} object
-#' @param b_box A set of bounding coordinates in matrix form like those returned from \code{rgeos::bbox()}
+#' @param b_box A set of bounding coordinates in matrix form like those returned from \code{sp::bbox()}
 #' @keywords spatial
 #' @export
 #' @examples 
 #' gBoundingPoints(points.spdf, bbox(container_polygon))
-gBoundingPoints = function(allpoints, rgeos::b_box) {
-	allpoints[allpoints@coords[,"longitude"] > b_box["x", "min"] & 
-	allpoints@coords[,"longitude"] < b_box["x", "max"] & 
-	allpoints@coords[,"latitude"] > b_box["y", "min"] & 
-	allpoints@coords[,"latitude"] < b_box["y", "max"],]
+gBoundingPoints = function(allpoints, b_box) {
+
+	if(class(b_box) == "matrix") {
+		v.ext = as.vector(t(b_box))
+		names(v.ext) = c("xmin", "xmax", "ymin", "ymax")
+
+		allpoints[allpoints@coords[,1] > v.ext["xmin"] & # longitude
+		allpoints@coords[,1] < v.ext["xmax"] & # longitude
+		allpoints@coords[,2] > v.ext["ymin"] & # latitude
+		allpoints@coords[,2] < v.ext["ymax"],] # latitude
+	}
+	else {
+		stop("What kind of bounding box are you throwing at me, smalls?")
+	}
+}
+
+#' Return indices of points within a box
+#' 
+#' Like \code{gBoundingPoints} but only returns the indices of points contained within a bounding box
+#'
+#' Rather than returning the spatial object, this give the indices of points within a bounding box. It's more useful for re-merging attributes (Since gBoundingPoints strips a SpatialPointsDataFrame to a SpatialPoints object). Or, better still, subsetting.
+#'
+#' \strong{Note}: all inputs should be of class \code{sp::SpatialPolygons|Points}
+#;
+#' @param allpoints A \code{SpatialPoints} or \code{SpatialPointsDataFrame} object
+#' @param b_box A set of bounding coordinates in matrix form like those returned from \code{sp::bbox()}
+#' @keywords spatial
+#' @export
+#' @examples 
+#' gWhichPoints(points.spdf, bbox(container_polygon))
+#' all_the_points_spdf[gWhichPoints(all_the_points.spdf, bbox(container_polygon)), ]
+gWhichPoints = function(allpoints, b_box) {
+
+	if(class(b_box) == "matrix") {
+		
+		allpoints = ma_lm_point
+		b_box = bbox(boston)
+
+		v.ext = as.vector(t(b_box))
+		names(v.ext) = c("xmin", "xmax", "ymin", "ymax")
+		which(
+		allpoints@coords[,1] > v.ext["xmin"] & # longitude
+		allpoints@coords[,1] < v.ext["xmax"] & # longitude
+		allpoints@coords[,2] > v.ext["ymin"] & # latitude
+		allpoints@coords[,2] < v.ext["ymax"] # latitude
+		)
+	}
+	else {
+		stop("What kind of bounding box are you throwing at me, smalls?")
+	}
 }

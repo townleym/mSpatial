@@ -9,7 +9,7 @@ gBoundingPoints(allpoints, b_box)
 \arguments{
 \item{allpoints}{A \code{SpatialPoints} or \code{SpatialPointsDataFrame} object}
 
-\item{b_box}{A set of bounding coordinates in matrix form like those returned from \code{rgeos::bbox}}
+\item{b_box}{A set of bounding coordinates in matrix form like those returned from \code{sp::bbox()}}
 }
 \description{
 Uses bracket extraction to very quickly select points within a bounding box
