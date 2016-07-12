@@ -4,7 +4,7 @@
 \alias{gBoundingPoly}
 \title{bounding box polygon function}
 \usage{
-gBoundingPoly(container, reference, tolerance = 1.5)
+gBoundingPoly(container, tolerance = 1.5)
 }
 \arguments{
 \item{container}{The single polygon to whose extent the reference polygons will be included}

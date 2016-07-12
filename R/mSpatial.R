@@ -10,8 +10,7 @@
 #' @export
 #' @examples 
 #' gBoundingPoly(drivetime, tolerance = 1.25)
-
-gBoundingPoly = function(container, reference, tolerance = 1.5) {
+gBoundingPoly = function(container, tolerance = 1.5) {
 
 	if(require(raster)) {
 		expansion.factor = (tolerance - 1) / 2
