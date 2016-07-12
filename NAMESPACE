@@ -2,6 +2,7 @@
 
 export(gBoundingPoints)
 export(gBoundingPoly)
+export(gBoundingPolyClip)
 export(gEnclosedArea)
 export(gEnclosedCentroid)
 export(gWhichPoints)

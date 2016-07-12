@@ -1,3 +1,37 @@
+#' bounding box polygon function
+#' 
+#' This function returns a bounding box polygon whose extent is some multiple of the extent of a container polygon. It's most useful as an input to other reducing operations.
+#'
+#' \strong{Note}: all inputs should be of class \code{sp::SpatialPolygons|Points}
+#;
+#' @param container The single polygon to whose extent the reference polygons will be included
+#' @param tolerance The multiple by which the container extent will be expanded (default = 1.5)
+#' @keywords spatial
+#' @export
+#' @examples 
+#' gBoundingPoly(drivetime, tolerance = 1.25)
+
+gBoundingPoly = function(container, reference, tolerance = 1.5) {
+
+	if(require(raster)) {
+		expansion.factor = (tolerance - 1) / 2
+	
+		# get the extent of the container polygon	
+		v.ext = as.vector(t(sp::bbox(container)))
+		names(v.ext) = c("xmin", "xmax", "ymin", "ymax")
+	
+		xrange = v.ext["xmax"] - v.ext["xmin"]
+		yrange = v.ext["ymax"] - v.ext["ymin"]
+	
+		# Calculate the new extent	
+		newext = bbox(container)
+		newext[1,] = v.ext[1:2] + c(-1,1) * (expansion.factor * xrange)
+		newext[2,] = v.ext[3:4] + c(-1,1) * (expansion.factor * yrange)
+			
+		as(raster::extent(newext), "SpatialPolygons")	
+	}
+}
+
 #' bounding box clip function
 #' 
 #' This function clips a set of reference polygons to some multiple of the extent of a container polygon. It is most useful for reducing a large set of polygons (e.g. US Census Block groups) to a smaller subset.
@@ -10,9 +44,9 @@
 #' @keywords spatial
 #' @export
 #' @examples 
-#' gBoundingPoly(drivetime, block_groups, tolerance = 1.25)
+#' gBoundingPolyClip(drivetime, block_groups, tolerance = 1.25)
 
-gBoundingPoly = function(container, reference, tolerance = 1.5) {
+gBoundingPolyClip = function(container, reference, tolerance = 1.5) {
 
 	if(require(raster)) {
 		# container = roggies_drivetime
@@ -172,8 +206,8 @@ gWhichPoints = function(allpoints, b_box) {
 
 	if(class(b_box) == "matrix") {
 		
-		allpoints = ma_lm_point
-		b_box = bbox(boston)
+		# allpoints = ma_lm_point
+		# b_box = bbox(boston)
 
 		v.ext = as.vector(t(b_box))
 		names(v.ext) = c("xmin", "xmax", "ymin", "ymax")
