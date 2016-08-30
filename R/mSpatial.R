@@ -221,3 +221,29 @@ gWhichPoints = function(allpoints, b_box) {
 		stop("What kind of bounding box are you throwing at me, smalls?")
 	}
 }
+
+#' Return polygons enclosed within a container
+#' 
+#' Pretty much a copy of \code{gEnclosedCentroid} but more robust
+#'
+#' Returns reference polygons whose centroids are enclosed within a containing polygon. Allows for (requires) the pre-specification of reference polygon centroids which is useful when there are a very large number of reference polygons. Uses a bounding box filter before any spatial operations which makes it much faster than a straight intersection.
+#'
+#' \strong{Note}: all inputs should be of class \code{sp::SpatialPolygons|Points}
+#;
+#' @param reference A \code{SpatialPolygons} or \code{SpatialPolygonsDataFrame} object with the values to be summarized within a containing polygon
+#' @param centroids A set of centroids for the reference polygons obtained by \code{gCentroids}
+#' @param container A \code{SpatialPolygons} or \code{SpatialPolygonsDataFrame} object of a single, container polygon
+#' @keywords spatial
+#' @export
+#' @examples 
+#' gPolyByCentroid(blockgroups, sp::gCentroid(blockgroups, byid = T), cbsa)
+gPolyByCentroid = function(reference, centroids, container) {
+
+	# 1 Use centroids of incoming polys to cut down to a bounding box
+	ta_blocks_bbox_centroids_idx = gWhichPoints(centroids, bbox(container))
+	# 2 Cut incoming polys down to those in the bounding box
+	ta_blocks_bbox = reference[ta_blocks_bbox_centroids_idx,]
+	# 3 return polys (from the bbox above) whose centroids lie in the container
+	ta_blocks_bbox[which(gContains(container, gCentroid(ta_blocks_bbox, byid = T), byid = T)),]
+
+}
