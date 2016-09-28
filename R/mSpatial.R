@@ -33,7 +33,7 @@ gBoundingPoly = function(container, tolerance = 1.5) {
 
 #' bounding box clip function
 #' 
-#' This function clips a set of reference polygons to some multiple of the extent of a container polygon. It is most useful for reducing a large set of polygons (e.g. US Census Block groups) to a smaller subset.
+#' This function clips a set of reference polygons to some multiple of the extent of a container polygon. It is most useful for reducing a large set of polygons (e.g. US Census Block groups) to a smaller subset. \strong{New!} it now returns full intersecting polygons rather than the clipped slivers. And if reference is a SpatialPolygonsDataFrame it will return a SpatialPolygonsDataFrame (yay!)
 #'
 #' \strong{Note}: all inputs should be of class \code{sp::SpatialPolygons|Points}
 #;
@@ -44,7 +44,6 @@ gBoundingPoly = function(container, tolerance = 1.5) {
 #' @export
 #' @examples 
 #' gBoundingPolyClip(drivetime, block_groups, tolerance = 1.25)
-
 gBoundingPolyClip = function(container, reference, tolerance = 1.5) {
 
 	if(require(raster)) {
@@ -66,13 +65,16 @@ gBoundingPolyClip = function(container, reference, tolerance = 1.5) {
 		newext[2,] = ext[2,] + c(-1,1) * (expansion.factor * yrange)
 			
 		temp_bp = as(raster::extent(newext), "SpatialPolygons")	
-		rgeos::gIntersection(reference, temp_bp, byid = T)
+		reference[raster::intersect(reference, temp_bp),]
+		# rgeos::gIntersection(reference, temp_bp, byid = T)
 	}
 }
 
-#' Return polygons enclosed by a container --based on a percent area enclosed
+#' Return polygons enclosed by a container --based on a percent area enclosed (deprecated)
 #' 
 #' We want to return the reference polygons whose areal overlap with the container falls within some threshold
+#'
+#' This function uses name matching / extraction. It's a kludge and often fails. use \code{gPolyByIntersect} instead. Preserved for existing code that uses it.
 #'
 #' \strong{Note}: all inputs should be of class \code{sp::SpatialPolygons|Points}.
 #' 
@@ -222,9 +224,11 @@ gWhichPoints = function(allpoints, b_box) {
 	}
 }
 
-#' Return polygons enclosed within a container
+#' Return polygons enclosed within a container (deprecated)
 #' 
 #' Pretty much a copy of \code{gEnclosedCentroid} but more robust
+#'
+#' Deprecated in favor \code{gPolyByIntersect(container, reference, centroid = T)} instead. Preserved for existing code that uses it.
 #'
 #' Returns reference polygons whose centroids are enclosed within a containing polygon. Allows for (requires) the pre-specification of reference polygon centroids which is useful when there are a very large number of reference polygons. Uses a bounding box filter before any spatial operations which makes it much faster than a straight intersection.
 #'
@@ -247,3 +251,163 @@ gPolyByCentroid = function(reference, centroids, container) {
 	ta_blocks_bbox[which(gContains(container, gCentroid(ta_blocks_bbox, byid = T), byid = T)),]
 
 }
+
+
+#' Error Trap
+#' 
+#' Copied from Hadley. Useful for providing a way for functions to exit gracefully from an error
+#'
+#' Returns \code{TRUE} if \code{try} returns an error
+#'
+#' @param any value returned from a function
+#' @keywords none
+#' @export
+#' @examples 
+#' result = try(somefunction())
+#' if(is.error(result)) {
+#'	print("Bailing out!")
+#' } else {
+#'	print("result is not an error!")
+#'	}
+is.error = function(x) {
+	inherits(x, "try-error")
+}
+
+#' Return polygons enclosed within a container (Deprecated)
+#' 
+#' Kinda like \code{gEnclosedArea}
+#'
+#' Returns all the reference polygons from a SpatialPolygonsDataFrame that intersect with a container. Adds an attribute to the @data slot with the percent of overlapping area. 
+#'
+#' This function uses name matching / extraction. It's a kludge and often fails. use \code{gPolyByIntersect} instead. Preserved for existing code that uses it.
+#'
+#' \strong{Note}: all inputs should be of class \code{sp::SpatialPolygons|Points}
+#;
+#' @param reference A \code{SpatialPolygons} or \code{SpatialPolygonsDataFrame} object with the values to be summarized within a containing polygon
+#' @param centroids A set of centroids for the reference polygons obtained by \code{gCentroids}
+#' @param container A \code{SpatialPolygons} or \code{SpatialPolygonsDataFrame} object of a single, container polygon
+#' @keywords spatial
+#' @export
+#' @examples 
+#' gPolyByCentroid(blockgroups, sp::gCentroid(blockgroups, byid = T), cbsa)
+
+# This time with error handling!
+# maybe give option to return slivers or full overlap
+mGetIntersecting = function(container, reference) {
+
+	clipped = try(rgeos::gIntersection(reference, container, byid = T))
+
+	if (is.error(clipped) | is.null(clipped)) { # catch errors in the gIntersection() function
+		return(NA)
+	} else {
+		clipped_names = sapply(strsplit(names(clipped), " "), "[[", 1)
+	
+		# calc area of intersecting parts
+		clipped_area = clipped %>% gArea(byid = T)
+		names(clipped_area) = sapply(strsplit(names(clipped), " "), "[[", 1)
+		clipped_area = data.frame(clipped_area = clipped_area, container_overlap = 	clipped_area / gArea(container))
+		clipped_reference = reference[which(rownames(reference@data) %in% clipped_names),]
+		
+		retframe = sp::merge(clipped_reference, clipped_area, by = "row.names")
+		return( retframe[order(retframe$container_overlap, decreasing = T),] )
+	} # end exception trap
+} # end mGetIntersecting
+
+#' Extract X, Y coordinates from a WKT points object
+#'
+#' Quick little thingy to run over a list of WKT points and convert to a data frame of lat/lon. Mostly done because some people think it's really clever to.... yeah
+#;
+#' @param ptwkt A bunch of WKT formatted single points
+#' @keywords spatial
+#' @export
+#' @examples 
+#' mWKTPointToXY(list_of_WKT_points)
+
+# this seems unnecessarily tedious
+mWKTPointToXY = function(ptwkt) {
+    thing = lapply(ptwkt, function(x) coordinates(readWKT(x)))
+    exes = sapply(thing, "[[", 1)
+    whys = sapply(thing, "[[", 2)
+    data.frame(lon = exes, lat = whys)
+}
+
+#' Return a square spatial polygon based on a radial distance from a point
+#' 
+#' Returns an object of type \code{SpatialPolygons} with a single feature. 
+#'
+#' @param {x, y} Real values corresponding to longitude and latitude of a point
+#' @param size radial size of box given in units for the given projection (meters by default)
+#' @param proj.srid a \code{proj4string} for a planar projected coordinate system. Default \code{epsg:3857} 'Web Mercator"
+#' @param gcs.srid a \code{proj4string} for the input geographic (lat/lon) coordinate system and for the returned object. Default \code{epsg:4326} 'WGS84"
+#' @keywords spatial
+#' @export
+#' @examples 
+#' box_1k = mBox(-90, 30, size = 500)
+mBox = function(x, y, size = 500, proj.srid = "+init=epsg:3857", gcs.srid = "+init=epsg:4326") {
+	wktstring = paste0("POINT(", x, " ", y,")")
+	pint = readWKT(wktstring, p4s = CRS(gcs.srid))
+	pint_proj = spTransform(pint, CRSobj = CRS(proj.srid))
+	ext = gBuffer(pint_proj, width = size) %>% bbox
+	prj_box = as(raster::extent(ext), "SpatialPolygons")
+	proj4string(prj_box) = proj.srid
+	# SpatialPolygons(raster::extent(ext))
+	spTransform(prj_box, CRSobj = CRS(gcs.srid))
+}
+
+
+#' Convert R color strings to hex 
+#' 
+#' Quickly create a hex string for a color + alpha channel
+#' 
+#' @param basecol An R base color name
+#' @param achannel (ideally) a hex value string for the alpha channel. Decimal values will be interpreted as hex
+#' 
+#' @examples
+#' col2hex("lightsteelblue", "70")
+col2hex = function(basecol, achannel = "") {
+	col2rgb(basecol) %>% as.hexmode %>% paste0(collapse = "") %>% paste0("#", ., achannel, collapse = "")
+}
+
+#' Return polygons intersecting with a container
+#' 
+#' This is the preferred function. It has been optimized for speed and flexibility. Allows choice of centroid or areal overlap (intersection). 
+#'
+#' \strong{Note}: all inputs should be of class \code{sp::SpatialPolygons|SpatialPolygonsDataFrame}.
+#' 
+#' Will warn if CRS mismatch between reference / container. 
+#' 
+#' @param container The single polygon that will enclose the set of reference polygons
+#' @param reference The set of polygons that will be selected down to the containing polygon based on areal overlap
+#' @param threshold The percent of areal overlap required for inclusion (ignored if \code{centroid = T})
+#' @param centroid Logical return reference polygons whose centroids are contained within the container
+#' @keywords spatial
+#' @export
+#' @examples 
+#' bgoi.clip = gBoundingPolyClip(box_parkway, bg_no_data)
+#' bgoi.cent = gPolyByIntersect(box_parkway, bgoi.clip, centroid = T)
+#' bgoi.area.20 = gPolyByIntersect(box_parkway, bgoi.clip, threshold = 0.2) 
+#' bgoi.intersect = gPolyByIntersect(box_parkway, bgoi.clip) 
+gPolyByIntersect = function(container, reference, threshold = 0, centroid = F) {
+	if(centroid) {
+		
+		centroids = gCentroid(reference, byid = T)
+		# 1 Use centroids of incoming polys to cut down to a bounding box
+		ta_blocks_bbox_centroids_idx = gWhichPoints(centroids, bbox(container))
+		# 2 Cut incoming polys down to those in the bounding box
+		ta_blocks_bbox = reference[ta_blocks_bbox_centroids_idx,]
+		# 3 return polys (from the bbox above) whose centroids lie in the container
+		ta_blocks_bbox[which(gContains(container, gCentroid(ta_blocks_bbox, byid = T), byid = T)),]
+		# end byCentroid
+
+	} else {
+		
+		slivers = raster::intersect(reference, container)
+		# use the google web mercator projection for area calc
+		sliver.area = gArea(spTransform(slivers, CRS("+init=epsg:3857")), byid = T) 
+		reference.area = gArea(spTransform(reference[slivers,], CRS("+init=epsg:3857")), byid = T)
+		overlap = sliver.area / reference.area
+		reference[slivers,][which(overlap > threshold),]
+
+	} # end byOverlap
+} # end gPolyByIntersect
+

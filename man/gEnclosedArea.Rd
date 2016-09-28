@@ -2,7 +2,7 @@
 % Please edit documentation in R/mSpatial.R
 \name{gEnclosedArea}
 \alias{gEnclosedArea}
-\title{Return polygons enclosed by a container --based on a percent area enclosed}
+\title{Return polygons enclosed by a container --based on a percent area enclosed (deprecated)}
 \usage{
 gEnclosedArea(container, reference, threshold = 0.99)
 }
@@ -17,6 +17,8 @@ gEnclosedArea(container, reference, threshold = 0.99)
 We want to return the reference polygons whose areal overlap with the container falls within some threshold
 }
 \details{
+This function uses name matching / extraction. It's a kludge and often fails. use \code{gPolyByIntersect} instead. Preserved for existing code that uses it.
+
 \strong{Note}: all inputs should be of class \code{sp::SpatialPolygons|Points}.
 
 Areal calculations really only work if the input polygons are rendered in the same planar projection.

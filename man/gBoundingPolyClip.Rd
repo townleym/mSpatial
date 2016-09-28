@@ -14,7 +14,7 @@ gBoundingPolyClip(container, reference, tolerance = 1.5)
 \item{tolerance}{The multiple by which the extent of the reference polygon will be expanded (default = 1.5)}
 }
 \description{
-This function clips a set of reference polygons to some multiple of the extent of a container polygon. It is most useful for reducing a large set of polygons (e.g. US Census Block groups) to a smaller subset.
+This function clips a set of reference polygons to some multiple of the extent of a container polygon. It is most useful for reducing a large set of polygons (e.g. US Census Block groups) to a smaller subset. \strong{New!} it now returns full intersecting polygons rather than the clipped slivers. And if reference is a SpatialPolygonsDataFrame it will return a SpatialPolygonsDataFrame (yay!)
 }
 \details{
 \strong{Note}: all inputs should be of class \code{sp::SpatialPolygons|Points}

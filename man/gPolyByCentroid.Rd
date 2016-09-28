@@ -2,7 +2,7 @@
 % Please edit documentation in R/mSpatial.R
 \name{gPolyByCentroid}
 \alias{gPolyByCentroid}
-\title{Return polygons enclosed within a container}
+\title{Return polygons enclosed within a container (deprecated)}
 \usage{
 gPolyByCentroid(reference, centroids, container)
 }
@@ -17,6 +17,8 @@ gPolyByCentroid(reference, centroids, container)
 Pretty much a copy of \code{gEnclosedCentroid} but more robust
 }
 \details{
+Deprecated in favor \code{gPolyByIntersect(container, reference, centroid = T)} instead. Preserved for existing code that uses it.
+
 Returns reference polygons whose centroids are enclosed within a containing polygon. Allows for (requires) the pre-specification of reference polygon centroids which is useful when there are a very large number of reference polygons. Uses a bounding box filter before any spatial operations which makes it much faster than a straight intersection.
 
 \strong{Note}: all inputs should be of class \code{sp::SpatialPolygons|Points}
