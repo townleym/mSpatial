@@ -362,6 +362,7 @@ mBox = function(x, y, size = 500, proj.srid = "+init=epsg:3857", gcs.srid = "+in
 #' @param basecol An R base color name
 #' @param achannel (ideally) a hex value string for the alpha channel. Decimal values will be interpreted as hex
 #' 
+#' @export
 #' @examples
 #' col2hex("lightsteelblue", "70")
 col2hex = function(basecol, achannel = "") {
