@@ -8,13 +8,19 @@ mBox(x, y, size = 500, square = T, landscape = T, long.ratio = 1.618034,
   proj.srid = "+init=epsg:3857", gcs.srid = "+init=epsg:4326")
 }
 \arguments{
-\item{size}{radial size of box given in units for the given projection (meters by default)}
+\item{size}{radial size of box given in units for the given projection (see Details)}
+
+\item{square}{should a square box (of area 2*size^2) be returned; if \code{F} then a rectangle whose long side is a multiple of size configured by...}
+
+\item{landscape}{whether to make the long dimension the horizontal (x) (default) or vertical}
+
+\item{long.ratio}{The factor for stretching the box along its long axis, configured by....}
 
 \item{proj.srid}{a \code{proj4string} for a planar projected coordinate system. Default \code{epsg:3857} 'Web Mercator"}
 
 \item{gcs.srid}{a \code{proj4string} for the input geographic (lat/lon) coordinate system and for the returned object. Default \code{epsg:4326} 'WGS84'}
 
-\item{{x, }{y} Real values corresponding to longitude and latitude of a point (expected as WGS84 or \code{epsg:4326})}
+\item{(x, }{y) Real values corresponding to longitude and latitude of a point (expected as WGS84 or \code{epsg:4326})}
 }
 \description{
 Returns an object of type \code{SpatialPolygons} with a single feature.
@@ -30,6 +36,7 @@ The function will return a polygon in the same coordinate system as the point gi
 }
 \examples{
 box_1k = mBox(-90, 30, size = 500)
+rectangle_1k = mBox(-90, 30, size = 1e3, square = F, long.ratio = 16/9)
 }
 \keyword{spatial}
 
