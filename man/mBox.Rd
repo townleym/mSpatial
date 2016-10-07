@@ -4,23 +4,23 @@
 \alias{mBox}
 \title{Return a spatial polygon from a point}
 \usage{
-mBox(x, y, size = 500, square = T, landscape = T, long.ratio = 1.618034,
+mBox(x, y, size = 500, square = T, long.ratio = 1.618034, landscape = T,
   proj.srid = "+init=epsg:3857", gcs.srid = "+init=epsg:4326")
 }
 \arguments{
+\item{x}{Real value corresponding to longitude of a point (expected as WGS84 or \code{epsg:4326})}
+
+\item{y}{Real value corresponding to latitude of a point (expected as WGS84 or \code{epsg:4326})}
+
 \item{size}{radial size of box given in units for the given projection (see Details)}
 
 \item{square}{should a square box (of area 2*size^2) be returned; if \code{F} then a rectangle whose long side is a multiple of size configured by...}
 
-\item{landscape}{whether to make the long dimension the horizontal (x) (default) or vertical}
-
 \item{long.ratio}{The factor for stretching the box along its long axis, configured by....}
 
-\item{proj.srid}{a \code{proj4string} for a planar projected coordinate system. Default \code{epsg:3857} 'Web Mercator"}
+\item{landscape}{whether to make the long dimension the horizontal (x) (default) or vertical}
 
-\item{gcs.srid}{a \code{proj4string} for the input geographic (lat/lon) coordinate system and for the returned object. Default \code{epsg:4326} 'WGS84'}
-
-\item{(x, }{y) Real values corresponding to longitude and latitude of a point (expected as WGS84 or \code{epsg:4326})}
+\item{proj.srid}{a \code{proj4string} for a planar projected coordinate system. Default \code{epsg:3857} or "Web Mercator"}
 }
 \description{
 Returns an object of type \code{SpatialPolygons} with a single feature.

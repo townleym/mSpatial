@@ -343,19 +343,20 @@ mWKTPointToXY = function(ptwkt) {
 #' 
 #' \strong{Note:} The default (flawed) "Web Mercator" (\code{EPSG:3857}) was chosen as the planar spatial reference system so as not to bias in favor of any world region. Since it is used here for area calculations and given the Mercator's well-known exaggeration of areas as latitudes get larger, an equal-area projection is recomended (e.g. in the U.S., the US National Atlas \code{"+init=epsg:2163"}).
 #'
-#' @param (x, y) Real values corresponding to longitude and latitude of a point (expected as WGS84 or \code{epsg:4326})
+#' @param x Real value corresponding to longitude of a point (expected as WGS84 or \code{epsg:4326})
+#' @param y Real value corresponding to latitude of a point (expected as WGS84 or \code{epsg:4326})
 #' @param size radial size of box given in units for the given projection (see Details)
 #' @param square should a square box (of area 2*size^2) be returned; if \code{F} then a rectangle whose long side is a multiple of size configured by...
 #' @param long.ratio The factor for stretching the box along its long axis, configured by....
 #' @param landscape whether to make the long dimension the horizontal (x) (default) or vertical
-#' @param proj.srid a \code{proj4string} for a planar projected coordinate system. Default \code{epsg:3857} 'Web Mercator"
-#' @param gcs.srid a \code{proj4string} for the input geographic (lat/lon) coordinate system and for the returned object. Default \code{epsg:4326} 'WGS84'
+#' @param proj.srid a \code{proj4string} for a planar projected coordinate system. Default \code{epsg:3857} or "Web Mercator"
+# #' @param gcs.srid a \code{proj4string} for the input geographic (lat/lon) coordinate system and for the returned object. Default \code{epsg:4326} or "WGS84"
 #' @keywords spatial
 #' @export
 #' @examples 
 #' box_1k = mBox(-90, 30, size = 500)
 #' rectangle_1k = mBox(-90, 30, size = 1e3, square = F, long.ratio = 16/9)
-mBox = function(x, y, size = 500, square = T, landscape = T, long.ratio = 1.618034, proj.srid = "+init=epsg:3857", gcs.srid = "+init=epsg:4326") {
+mBox = function(x, y, size = 500, square = T, long.ratio = 1.618034, landscape = T, proj.srid = "+init=epsg:3857", gcs.srid = "+init=epsg:4326") {
 	
 	# convert the x,y coordinates to a spatial point with a useful 
 	# planar projection
