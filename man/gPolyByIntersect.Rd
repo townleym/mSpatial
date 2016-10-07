@@ -16,7 +16,7 @@ gPolyByIntersect(container, reference, threshold = 0, centroid = F)
 \item{centroid}{Logical return reference polygons whose centroids are contained within the container}
 }
 \description{
-This is the preferred function. It has been optimized for speed and flexibility. Allows choice of centroid or areal overlap (intersection).
+This is the preferred function. It has been optimized for speed and flexibility. Allows choice of centroid or areal overlap (intersection). Amount of overlap (for non-centroid intersection methods) specified by \code{threshold} defaults to zero which returns an intersection for two polygons that share any one point (unfortunately) including a border.
 }
 \details{
 \strong{Note}: all inputs should be of class \code{sp::SpatialPolygons|SpatialPolygonsDataFrame}.

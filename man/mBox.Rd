@@ -2,22 +2,31 @@
 % Please edit documentation in R/mSpatial.R
 \name{mBox}
 \alias{mBox}
-\title{Return a square spatial polygon based on a radial distance from a point}
+\title{Return a spatial polygon from a point}
 \usage{
-mBox(x, y, size = 500, proj.srid = "+init=epsg:3857",
-  gcs.srid = "+init=epsg:4326")
+mBox(x, y, size = 500, square = T, landscape = T, long.ratio = 1.618034,
+  proj.srid = "+init=epsg:3857", gcs.srid = "+init=epsg:4326")
 }
 \arguments{
 \item{size}{radial size of box given in units for the given projection (meters by default)}
 
 \item{proj.srid}{a \code{proj4string} for a planar projected coordinate system. Default \code{epsg:3857} 'Web Mercator"}
 
-\item{gcs.srid}{a \code{proj4string} for the input geographic (lat/lon) coordinate system and for the returned object. Default \code{epsg:4326} 'WGS84"}
+\item{gcs.srid}{a \code{proj4string} for the input geographic (lat/lon) coordinate system and for the returned object. Default \code{epsg:4326} 'WGS84'}
 
-\item{{x, }{y} Real values corresponding to longitude and latitude of a point}
+\item{{x, }{y} Real values corresponding to longitude and latitude of a point (expected as WGS84 or \code{epsg:4326})}
 }
 \description{
 Returns an object of type \code{SpatialPolygons} with a single feature.
+}
+\details{
+Default behavior is a square polygon based on radial distance (specified by \code{size}) in the unit of the projection spatial reference system. Default linear measure is in meters. Because it is defined radially a square buffer will have sides equal to 2x the \code{size} argument.
+
+If \code{square = F} the \code{size} argument will be scaled as a multiple of \code{long.ratio}. If \code{landscape = T} (default) is chosen, then the X-axis (horizontal) side will be longer. Note that \code{square = F} implies a 1:1 correspondence between \code{size} and the shortest side of the rectangle. In other words, if the \code{size} argument is unchanged, the short side of a box from \code{square = F} will be one half the length of the side of a box where \code{square = T}. I could fix that pretty easily. But this works fine for me...
+
+The function will return a polygon in the same coordinate system as the point given as input (specified as \code{gcs.srid}). It makes no attempt to transform the spatial reference system of the input point. As of now, it's only been tested with points in WGS84 (\code{epsg:4326}) lat/long (x = long, y = lat).
+
+\strong{Note:} The default (flawed) "Web Mercator" (\code{EPSG:3857}) was chosen as the planar spatial reference system so as not to bias in favor of any world region. Since it is used here for area calculations and given the Mercator's well-known exaggeration of areas as latitudes get larger, an equal-area projection is recomended (e.g. in the U.S., the US National Atlas \code{"+init=epsg:2163"}).
 }
 \examples{
 box_1k = mBox(-90, 30, size = 500)
