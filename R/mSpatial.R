@@ -331,28 +331,61 @@ mWKTPointToXY = function(ptwkt) {
     data.frame(lon = exes, lat = whys)
 }
 
-#' Return a square spatial polygon based on a radial distance from a point
+#' Return a spatial polygon from a point
 #' 
 #' Returns an object of type \code{SpatialPolygons} with a single feature. 
+#' 
+#' Default behavior is a square polygon based on radial distance (specified by \code{size}) in the unit of the projection spatial reference system. Default linear measure is in meters. Because it is defined radially a square buffer will have sides equal to 2x the \code{size} argument. 
+#' 
+#' If \code{square = F} the \code{size} argument will be scaled as a multiple of \code{long.ratio}. If \code{landscape = T} (default) is chosen, then the X-axis (horizontal) side will be longer. Note that \code{square = F} implies a 1:1 correspondence between \code{size} and the shortest side of the rectangle. In other words, if the \code{size} argument is unchanged, the short side of a box from \code{square = F} will be one half the length of the side of a box where \code{square = T}. I could fix that pretty easily. But this works fine for me...
+#' 
+#' The function will return a polygon in the same coordinate system as the point given as input (specified as \code{gcs.srid}). It makes no attempt to transform the spatial reference system of the input point. As of now, it's only been tested with points in WGS84 (\code{epsg:4326}) lat/long (x = long, y = lat).
+#' 
+#' \strong{Note:} The default (flawed) "Web Mercator" (\code{EPSG:3857}) was chosen as the planar spatial reference system so as not to bias in favor of any world region. Since it is used here for area calculations and given the Mercator's well-known exaggeration of areas as latitudes get larger, an equal-area projection is recomended (e.g. in the U.S., the US National Atlas \code{"+init=epsg:2163"}).
 #'
-#' @param {x, y} Real values corresponding to longitude and latitude of a point
+#' @param {x, y} Real values corresponding to longitude and latitude of a point (expected as WGS84 or \code{epsg:4326})
 #' @param size radial size of box given in units for the given projection (meters by default)
 #' @param proj.srid a \code{proj4string} for a planar projected coordinate system. Default \code{epsg:3857} 'Web Mercator"
-#' @param gcs.srid a \code{proj4string} for the input geographic (lat/lon) coordinate system and for the returned object. Default \code{epsg:4326} 'WGS84"
+#' @param gcs.srid a \code{proj4string} for the input geographic (lat/lon) coordinate system and for the returned object. Default \code{epsg:4326} 'WGS84'
 #' @keywords spatial
 #' @export
 #' @examples 
 #' box_1k = mBox(-90, 30, size = 500)
-mBox = function(x, y, size = 500, proj.srid = "+init=epsg:3857", gcs.srid = "+init=epsg:4326") {
+mBox = function(x, y, size = 500, square = T, landscape = T, long.ratio = 1.618034, proj.srid = "+init=epsg:3857", gcs.srid = "+init=epsg:4326") {
+	
+	# convert the x,y coordinates to a spatial point with a useful 
+	# planar projection
 	wktstring = paste0("POINT(", x, " ", y,")")
 	pint = readWKT(wktstring, p4s = CRS(gcs.srid))
 	pint_proj = spTransform(pint, CRSobj = CRS(proj.srid))
-	ext = gBuffer(pint_proj, width = size) %>% bbox
+
+	# Calculate the extent of the box either as a square...
+	if(square) {
+		ext = gBuffer(pint_proj, width = size) %>% bbox
+		
+	} else {	# ...or as a rectangle with one side longer according to long.ratio
+		long.side = size * long.ratio
+	
+		x.coord = coordinates(pint_proj)[,"x"]
+		y.coord = coordinates(pint_proj)[,"y"]
+
+		if(landscape) {
+			exes = x.coord + ((c(-1,1) * (long.side / 2)))
+			whys = y.coord + ((c(-1,1) * (size / 2))) 
+		} else {
+			exes = x.coord + ((c(-1,1) * (size / 2)))
+			whys = y.coord + ((c(-1,1) * (long.side / 2))) 
+		}
+		ext = as.matrix(rbind(x = exes, y = whys))
+		colnames(ext) = c("min", "max")
+
+	} # end rectangle
+
 	prj_box = as(raster::extent(ext), "SpatialPolygons")
 	proj4string(prj_box) = proj.srid
-	# SpatialPolygons(raster::extent(ext))
 	spTransform(prj_box, CRSobj = CRS(gcs.srid))
-}
+
+} # end mBox function
 
 
 #' Convert R color strings to hex 
@@ -371,7 +404,7 @@ col2hex = function(basecol, achannel = "") {
 
 #' Return polygons intersecting with a container
 #' 
-#' This is the preferred function. It has been optimized for speed and flexibility. Allows choice of centroid or areal overlap (intersection). 
+#' This is the preferred function. It has been optimized for speed and flexibility. Allows choice of centroid or areal overlap (intersection). Amount of overlap (for non-centroid intersection methods) specified by \code{threshold} defaults to zero which returns an intersection for two polygons that share any one point (unfortunately) including a border.
 #'
 #' \strong{Note}: all inputs should be of class \code{sp::SpatialPolygons|SpatialPolygonsDataFrame}.
 #' 
