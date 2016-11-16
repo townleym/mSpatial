@@ -450,3 +450,80 @@ gPolyByIntersect = function(container, reference, threshold = 0, centroid = F) {
 	} # end byOverlap
 } # end gPolyByIntersect
 
+#' Plot OSM basemap 
+#' 
+#' Convenience wrapper around the openmap() function to return the basemap around an input geometry. 
+#'
+#' \strong{Note}: for now it really only works around a polygon
+#' 
+#' @param geom Input geometry (polygon)
+#' @param tolerance multiplier for the size of the bounding box around the input geometry
+#' @param tileserver see the openmap() documentation for options
+#'
+#' @keywords spatial
+#' @export
+#' @examples 
+#' basemap = osmGet(cambridge_town, tolerance = 1.5, tileserver = "mapbox")
+#' plot(basemap)
+#' # skobbler maps look better with a little purple haze
+#' plot(spTransform(gBoundingPoly(cambridge_town, tolerance = 1.5), osm()), add = T, col = col2hex("lavender", "40"), border = NA)
+#' plot(spTransform(cambridge_town, osm()), add = T, col = col2hex("skyblue", "80"))
+osmGet = function(geom, tolerance = 2, tileserver = "skobbler") {
+		
+	if(require(OpenStreetMap)) {
+		ext_map_box = gBoundingPoly(geom, tolerance)
+		proj4string(ext_map_box) = CRS("+init=epsg:4326")
+		basemap_ext = bbox(ext_map_box)
+
+		basemap_topleft = basemap_ext %>% diag %>% rev 
+		basemap_bottomright = c(basemap_ext[2,1], basemap_ext[1,2])
+
+		openmap(basemap_topleft, basemap_bottomright, type = tileserver)	
+	}	
+}
+
+#' summarize attributes over a containing geometry
+#' 
+#' Convenience wrapper around gPolyByIntersect that applies a function over specified attributes in the reference set. It allows for buffering the input container.
+#'
+#' \strong{Note}: careful, it's pretty fragile
+#' 
+#' @param container The thing you want to summarize within
+#' @param reference The thing whose attributes you want to summarize
+#' @param buffer How much you want to blow up the summarizing container (in meters)
+#' @param colnamevec A vector of column names corresponding to those in the container whose values will be summarized
+#' @param centroid Whether to use containing centroids for choosing reference geometries within the container
+#' @param threshold the overlap percentage to use when \code{centroid = F}
+#'
+#' @keywords spatial
+#' @export
+#' @examples 
+#' mSummarizer(cambridge_town, boston_blocks, buffer = 0, c("total_pop", "total_hh"), centroid = T, FUN = "sum")
+mSummarizer = function(container, reference, buffer = 1, colnamevec, centroid = F, threshold = 0.99, FUN) {
+	
+	# constant
+	gmap = "+init=epsg:3857"
+	# set incoming container projection to back transform after projection	
+	container_proj = proj4string(container)
+
+	# for dev
+	# container = beacon_mi
+	# reference = bg_hh_car
+	# buffer = 1
+	# colnamevec = names(hh_car)[c(3,5,6,8,9)]
+	# centroid = T
+	# threshold = 0.99
+	# FUN = "sum"
+	
+	# Get the right function to apply()
+	FUN = match.fun(FUN)
+	
+	# buffer the incoming geography (defaults to no buffer)
+	buffered_container = gBuffer(spTransform(container, CRSobj = gmap), width = buffer) %>% spTransform(CRSobj = CRS(container_proj))
+	
+	# Get the reference polygons contained within the container
+	sub_ref = gPolyByIntersect(buffered_container, reference, centroid = centroid, threshold = threshold)
+
+	# Sum up attributes given by colnamevec	
+	apply(sub_ref@data[,colnamevec], 2, FUN)
+}
