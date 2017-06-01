@@ -403,6 +403,7 @@ mBox = function(x, y, size = 500, square = T, long.ratio = 1.618034, landscape =
 #' @export
 #' @examples
 #' col2hex("lightsteelblue", "70")
+#' sapply(brewer.pal(n = 5, name = "BuPu"), function(x) {col2hex(x, achannel = '80')})
 col2hex = function(basecol, achannel = "") {
 	col2rgb(basecol) %>% as.hexmode %>% paste0(collapse = "") %>% paste0("#", ., achannel, collapse = "")
 }
@@ -472,7 +473,8 @@ osmGet = function(geom, tolerance = 2, tileserver = "skobbler") {
 		
 	if(require(OpenStreetMap)) {
 		ext_map_box = gBoundingPoly(geom, tolerance)
-		proj4string(ext_map_box) = CRS("+init=epsg:4326")
+		# proj4string(ext_map_box) = CRS("+init=epsg:4326")
+		proj4string(ext_map_box) = CRS(proj4string(geom))
 		basemap_ext = bbox(ext_map_box)
 
 		basemap_topleft = basemap_ext %>% diag %>% rev 
@@ -526,4 +528,23 @@ mSummarizer = function(container, reference, buffer = 1, colnamevec, centroid = 
 
 	# Sum up attributes given by colnamevec	
 	apply(sub_ref@data[,colnamevec], 2, FUN)
+}
+
+#' Height / width ratio
+#' 
+#' Quick function for getting the 1/aspect ratio of a geometry
+#' 
+#' @param geom an \code{sp} geometry object
+#' 
+#' Since map objects have varying aspect ratios, saving them to files results in lots of whitespace. This function enables you to specify the output dimensions in the same ratio as the \code{sp} object.
+#' 
+#' @export
+#' @examples
+#' x = 800 # width in pixels
+#' y = yoverx(basemap)
+#' png(filename, width = x, height = y)
+yoverx = function(geom) {
+	ta.bbox = bbox(spTransform(geom, osm()))
+	xy = ta.bbox[,"max"] - ta.bbox[,"min"]
+	xy["y"] / xy["x"]
 }
