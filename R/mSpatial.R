@@ -27,7 +27,9 @@ gBoundingPoly = function(container, tolerance = 1.5) {
 		newext[1,] = v.ext[1:2] + c(-1,1) * (expansion.factor * xrange)
 		newext[2,] = v.ext[3:4] + c(-1,1) * (expansion.factor * yrange)
 			
-		as(raster::extent(newext), "SpatialPolygons")	
+		bp = as(raster::extent(newext), "SpatialPolygons")	
+		proj4string(bp) = proj4string(container)
+		bp
 	}
 }
 
@@ -451,9 +453,9 @@ gPolyByIntersect = function(container, reference, threshold = 0, centroid = F) {
 	} # end byOverlap
 } # end gPolyByIntersect
 
-#' Plot OSM basemap 
+#' Plot OSM basemap (deprecated)
 #' 
-#' Convenience wrapper around the openmap() function to return the basemap around an input geometry. 
+#' Convenience wrapper around the openmap() function to return the basemap around an input geometry. This has been deprecated in favor of \code{topleft()} and \code{bottomright()}.
 #'
 #' \strong{Note}: for now it really only works around a polygon
 #' 
@@ -482,6 +484,49 @@ osmGet = function(geom, tolerance = 2, tileserver = "skobbler") {
 
 		openmap(basemap_topleft, basemap_bottomright, type = tileserver)	
 	}	
+}
+
+
+#' Retrieve topleft of \code{sp} object
+#' 
+#' For use with the (annoying) \code{openmap()} functions which retrieve basemap tiles for a box specified by the topleft and bottom right vertices.
+#'
+#' @param geom Input geometry (polygon)
+#'
+#' @keywords spatial
+#' @export
+#' @examples 
+#' shade = gBoundingPoly(cambridge_town, tol = 1.1)
+#' basemap = openmap(topleft(shade), bottomright(shade), type = "skobbler")
+#' 
+#' plot(basemap)
+#' # skobbler maps look better with a little purple haze
+#' plot(spTransform(shade, osm()), add = T, col = col2hex("lavender", "40"), border = NA)
+#' plot(spTransform(cambridge_town, osm()), add = T, col = col2hex("skyblue", "80"))
+topleft = function(geom) {
+	box = bbox(geom)
+	c(max(box[2,]), min(box[1,]))	
+}
+
+#' Retrieve bottomright of \code{sp} object
+#' 
+#' For use with the (annoying) \code{openmap()} functions which retrieve basemap tiles for a box specified by the topleft and bottom right vertices.
+#'
+#' @param geom Input geometry (polygon)
+#'
+#' @keywords spatial
+#' @export
+#' @examples 
+#' shade = gBoundingPoly(cambridge_town, tol = 1.1)
+#' basemap = openmap(topleft(shade), bottomright(shade), type = "skobbler")
+#' 
+#' plot(basemap)
+#' # skobbler maps look better with a little purple haze
+#' plot(spTransform(shade, osm()), add = T, col = col2hex("lavender", "40"), border = NA)
+#' plot(spTransform(cambridge_town, osm()), add = T, col = col2hex("skyblue", "80"))
+bottomright = function(geom) {
+	box = bbox(geom)
+	c(min(box[2,]), max(box[1,]))
 }
 
 #' summarize attributes over a containing geometry
@@ -543,8 +588,18 @@ mSummarizer = function(container, reference, buffer = 1, colnamevec, centroid = 
 #' x = 800 # width in pixels
 #' y = yoverx(basemap)
 #' png(filename, width = x, height = y)
-yoverx = function(geom) {
-	ta.bbox = bbox(spTransform(geom, osm()))
-	xy = ta.bbox[,"max"] - ta.bbox[,"min"]
-	xy["y"] / xy["x"]
+yoverx = function(geom, osm = T) {
+	
+	if(osm) {
+		ta.bbox = bbox(spTransform(geom, osm()))
+		xy = ta.bbox[,"max"] - ta.bbox[,"min"]
+		xy[2] / xy[1]		
+		
+	} else {
+		laea = "+init=epsg:2163" # laea US natl atlas
+	
+		ta.bbox = bbox(spTransform(geom, CRSobj = CRS(laea)))
+		xy = ta.bbox[,"max"] - ta.bbox[,"min"]
+		xy[2] / xy[1]		
+	}
 }
