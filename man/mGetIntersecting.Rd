@@ -27,4 +27,3 @@ This function uses name matching / extraction. It's a kludge and often fails. us
 gPolyByCentroid(blockgroups, sp::gCentroid(blockgroups, byid = T), cbsa)
 }
 \keyword{spatial}
-

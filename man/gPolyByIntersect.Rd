@@ -30,4 +30,3 @@ bgoi.area.20 = gPolyByIntersect(box_parkway, bgoi.clip, threshold = 0.2)
 bgoi.intersect = gPolyByIntersect(box_parkway, bgoi.clip) 
 }
 \keyword{spatial}
-

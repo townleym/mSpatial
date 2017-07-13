@@ -30,4 +30,3 @@ Convenience wrapper around gPolyByIntersect that applies a function over specifi
 mSummarizer(cambridge_town, boston_blocks, buffer = 0, c("total_pop", "total_hh"), centroid = T, FUN = "sum")
 }
 \keyword{spatial}
-

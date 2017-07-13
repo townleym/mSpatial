@@ -23,4 +23,3 @@ Intersect methods (e.g. \code{rgeos::gContains} or \code{rgeos::gIntersection}) 
 gBoundingPoints(points.spdf, bbox(container_polygon))
 }
 \keyword{spatial}
-

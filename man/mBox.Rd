@@ -39,4 +39,3 @@ box_1k = mBox(-90, 30, size = 500)
 rectangle_1k = mBox(-90, 30, size = 1e3, square = F, long.ratio = 16/9)
 }
 \keyword{spatial}
-

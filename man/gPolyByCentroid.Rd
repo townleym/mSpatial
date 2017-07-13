@@ -27,4 +27,3 @@ Returns reference polygons whose centroids are enclosed within a containing poly
 gPolyByCentroid(blockgroups, sp::gCentroid(blockgroups, byid = T), cbsa)
 }
 \keyword{spatial}
-

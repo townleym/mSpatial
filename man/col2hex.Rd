@@ -16,5 +16,5 @@ Quickly create a hex string for a color + alpha channel
 }
 \examples{
 col2hex("lightsteelblue", "70")
+sapply(brewer.pal(n = 5, name = "BuPu"), function(x) {col2hex(x, achannel = '80')})
 }
-

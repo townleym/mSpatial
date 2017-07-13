@@ -36,4 +36,3 @@ reference.bg.proj = gBoundingPoly(drivetime.proj, blockgroups.proj, tolerance = 
 gEnclosedArea(drivetime.proj, reference.bg.proj, threshold = 0.2)
 }
 \keyword{spatial}
-

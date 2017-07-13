@@ -16,4 +16,3 @@ Quick little thingy to run over a list of WKT points and convert to a data frame
 mWKTPointToXY(list_of_WKT_points)
 }
 \keyword{spatial}
-

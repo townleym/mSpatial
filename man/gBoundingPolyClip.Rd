@@ -23,4 +23,3 @@ This function clips a set of reference polygons to some multiple of the extent o
 gBoundingPolyClip(drivetime, block_groups, tolerance = 1.25)
 }
 \keyword{spatial}
-

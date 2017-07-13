@@ -21,4 +21,3 @@ This function returns a bounding box polygon whose extent is some multiple of th
 gBoundingPoly(drivetime, tolerance = 1.25)
 }
 \keyword{spatial}
-

@@ -21,4 +21,3 @@ We want to return the reference polygons whose centroids are contained within a 
 gEnclosedCentroid(drivetime, block_groups)
 }
 \keyword{spatial}
-

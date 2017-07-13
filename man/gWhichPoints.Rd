@@ -24,4 +24,3 @@ gWhichPoints(points.spdf, bbox(container_polygon))
 all_the_points_spdf[gWhichPoints(all_the_points.spdf, bbox(container_polygon)), ]
 }
 \keyword{spatial}
-

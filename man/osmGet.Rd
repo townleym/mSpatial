@@ -2,7 +2,7 @@
 % Please edit documentation in R/mSpatial.R
 \name{osmGet}
 \alias{osmGet}
-\title{Plot OSM basemap}
+\title{Plot OSM basemap (deprecated)}
 \usage{
 osmGet(geom, tolerance = 2, tileserver = "skobbler")
 }
@@ -14,7 +14,7 @@ osmGet(geom, tolerance = 2, tileserver = "skobbler")
 \item{tileserver}{see the openmap() documentation for options}
 }
 \description{
-Convenience wrapper around the openmap() function to return the basemap around an input geometry.
+Convenience wrapper around the openmap() function to return the basemap around an input geometry. This has been deprecated in favor of \code{topleft()} and \code{bottomright()}.
 }
 \details{
 \strong{Note}: for now it really only works around a polygon
@@ -27,4 +27,3 @@ plot(spTransform(gBoundingPoly(cambridge_town, tolerance = 1.5), osm()), add = T
 plot(spTransform(cambridge_town, osm()), add = T, col = col2hex("skyblue", "80"))
 }
 \keyword{spatial}
-
