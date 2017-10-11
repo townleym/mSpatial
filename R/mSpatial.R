@@ -347,6 +347,7 @@ mWKTPointToXY = function(ptwkt) {
 #'
 #' @param x Real value corresponding to longitude of a point (expected as WGS84 or \code{epsg:4326})
 #' @param y Real value corresponding to latitude of a point (expected as WGS84 or \code{epsg:4326})
+#' @param wktstring a WKT formatted point \strong{required} if \code{x, y} not given
 #' @param size radial size of box given in units for the given projection (see Details)
 #' @param square should a square box (of area 2*size^2) be returned; if \code{F} then a rectangle whose long side is a multiple of size configured by...
 #' @param long.ratio The factor for stretching the box along its long axis, configured by....
@@ -356,13 +357,16 @@ mWKTPointToXY = function(ptwkt) {
 #' @keywords spatial
 #' @export
 #' @examples 
+#' box_1k = mBox(wktstring = "POINT(90 30)", size = 500)
 #' box_1k = mBox(-90, 30, size = 500)
 #' rectangle_1k = mBox(-90, 30, size = 1e3, square = F, long.ratio = 16/9)
-mBox = function(x, y, size = 500, square = T, long.ratio = 1.618034, landscape = T, proj.srid = "+init=epsg:3857", gcs.srid = "+init=epsg:4326") {
-	
+mBox = function(x, y, wktstring, size = 500, square = T, long.ratio = 1.618034, landscape = T, proj.srid = "+init=epsg:3857", gcs.srid = "+init=epsg:4326") {
+		
+	if(!exists("wktstring")) {
+		wktstring = paste0("POINT(", x, " ", y,")")	
+	}
 	# convert the x,y coordinates to a spatial point with a useful 
 	# planar projection
-	wktstring = paste0("POINT(", x, " ", y,")")
 	pint = readWKT(wktstring, p4s = CRS(gcs.srid))
 	pint_proj = spTransform(pint, CRSobj = CRS(proj.srid))
 

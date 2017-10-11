@@ -4,13 +4,16 @@
 \alias{mBox}
 \title{Return a spatial polygon from a point}
 \usage{
-mBox(x, y, size = 500, square = T, long.ratio = 1.618034, landscape = T,
-  proj.srid = "+init=epsg:3857", gcs.srid = "+init=epsg:4326")
+mBox(x, y, wktstring, size = 500, square = T, long.ratio = 1.618034,
+  landscape = T, proj.srid = "+init=epsg:3857",
+  gcs.srid = "+init=epsg:4326")
 }
 \arguments{
 \item{x}{Real value corresponding to longitude of a point (expected as WGS84 or \code{epsg:4326})}
 
 \item{y}{Real value corresponding to latitude of a point (expected as WGS84 or \code{epsg:4326})}
+
+\item{wktstring}{a WKT formatted point \strong{required} if \code{x, y} not given}
 
 \item{size}{radial size of box given in units for the given projection (see Details)}
 
@@ -35,6 +38,7 @@ The function will return a polygon in the same coordinate system as the point gi
 \strong{Note:} The default (flawed) "Web Mercator" (\code{EPSG:3857}) was chosen as the planar spatial reference system so as not to bias in favor of any world region. Since it is used here for area calculations and given the Mercator's well-known exaggeration of areas as latitudes get larger, an equal-area projection is recomended (e.g. in the U.S., the US National Atlas \code{"+init=epsg:2163"}).
 }
 \examples{
+box_1k = mBox(wktstring = "POINT(90 30)", size = 500)
 box_1k = mBox(-90, 30, size = 500)
 rectangle_1k = mBox(-90, 30, size = 1e3, square = F, long.ratio = 16/9)
 }
