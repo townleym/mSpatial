@@ -67,6 +67,7 @@ gBoundingPolyClip = function(container, reference, tolerance = 1.5) {
 		newext[2,] = ext[2,] + c(-1,1) * (expansion.factor * yrange)
 			
 		temp_bp = as(raster::extent(newext), "SpatialPolygons")	
+        proj4string(temp_bp) = CRS(proj4string(container))		
 		reference[raster::intersect(reference, temp_bp),]
 		# rgeos::gIntersection(reference, temp_bp, byid = T)
 	}
